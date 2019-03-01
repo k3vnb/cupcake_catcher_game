@@ -124,6 +124,16 @@ jump = () => {
     }
 }
 
+updateFoodPosition = () => {
+    for (var i in foodList){
+        if (foodList[i].y > 500){
+            foodList.splice(i, 1);
+        }
+        else {
+            foodList[i].y += foodObject.spd;
+        }
+    }
+}
 
 updateCatcherPosition = () => {
     if (catcher.leftPressed && catcher.x > 0){
@@ -137,6 +147,15 @@ updateCatcherPosition = () => {
 updatePosition = () => {
     ctx.clearRect(0,0,500,500);
     drawObject(background, 0,0,500,500);
+    foodTimer++;
+    if (foodTimer > 100){
+        foodList.push({'x':foodDrop[Math.round(Math.random() * 9)],'y':0});
+        foodTimer = 0;
+    }
+    if (catcher.onair){
+        drawObject(catcherFour, catcher.x, catcher.y, catcher.width, catcher.height);
+        animation = 1;
+    }
     if (animation === 0){
         drawObject(catcherTwo, catcher.x, catcher.y, catcher.width, catcher.height);
         animation = 1;
@@ -145,10 +164,14 @@ updatePosition = () => {
         animation = 0;
     }
 
+    for (var i in foodList){
+        drawObject(food, foodList[i].x, foodList[i].y, foodObject.width, foodObject.height)
+    }
     for (let i=0; i<tileList.length; i++){
         drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
     }
 
+    updateFoodPosition();
     updateCatcherPosition();
     jump();
 }
