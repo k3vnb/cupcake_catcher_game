@@ -83,14 +83,51 @@ drawObject = (object, x, y, width, height) => {
     ctx.drawImage(object,x,y,width,height);
 }
 
+document.onkeydown = () => {
+    if (event.keyCode === 37 && catcher.x > 0){
+        catcher.spd = -5;
+        catcher.leftPressed = true;
+    }
+    if (event.keyCode === 39 && catcher.x < 500 - catcher.width) {
+        catcher.spd = 5;
+        catcher.rightPressed = true;
+    }
+}
+
+document.onkeyup = () => {
+    if (event.keyCode === 37){
+        catcher.leftPressed = false;
+    }
+    if (event.keyCode === 39) {
+        catcher.rightPressed = false;
+    }
+}
+
+updateCatcherPosition = () => {
+    if (catcher.leftPressed && catcher.x > 0){
+        catcher.x += catcher.spd;
+    }
+    if (catcher.rightPressed && catcher.x < 500 - catcher.width){
+        catcher.x += catcher.spd;
+    }
+}
+
 updatePosition = () => {
     ctx.clearRect(0,0,500,500);
     drawObject(background, 0,0,500,500);
-    drawObject(catcherTwo, catcher.x, catcher.y, catcher.width, catcher.height);
+    if (animation === 0){
+        drawObject(catcherTwo, catcher.x, catcher.y, catcher.width, catcher.height);
+        animation = 1;
+    } else {
+        drawObject(catcherOne, catcher.x, catcher.y, catcher.width, catcher.height);
+        animation = 0;
+    }
 
     for (let i=0; i<tileList.length; i++){
         drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
     }
+
+    updateCatcherPosition();
 
 }
 
