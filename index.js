@@ -83,6 +83,17 @@ drawObject = (object, x, y, width, height) => {
     ctx.drawImage(object,x,y,width,height);
 }
 
+updatePosition = () => {
+    ctx.clearRect(0,0,500,500);
+    drawObject(background, 0,0,500,500);
+    drawObject(catcherTwo, catcher.x, catcher.y, catcher.width, catcher.height);
+
+    for (let i=0; i<tileList.length; i++){
+        drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
+    }
+
+}
+
 startGame = () => {
     score = 0;
     level = 100;
@@ -102,7 +113,7 @@ startGame = () => {
         tileList.push({'x':i*50, 'y':400})
     }
 
-    for (let i=0; i<tileList.length; i++){
-        drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
-    }
+    intervalvar = setInterval(updatePosition,10);
+
+
 }
