@@ -92,6 +92,10 @@ document.onkeydown = () => {
         catcher.spd = 5;
         catcher.rightPressed = true;
     }
+    if (event.keyCode === 38 && !catcher.onair && catcher.y === 350){
+        catcher.jump = 100;
+        catcher.onair = true;
+    }
 }
 
 document.onkeyup = () => {
@@ -102,6 +106,24 @@ document.onkeyup = () => {
         catcher.rightPressed = false;
     }
 }
+
+jump = () => {
+    //Moving Up
+    if (catcher.jump > 0 && catcher.onair){
+        catcher.y -= catcher.jumpUnit;
+        catcher.jump -= catcher.jumpUnit;
+    }
+
+    if (catcher.jump <= 0 && catcher.jump > -100 && catcher.onair){
+        catcher.y += catcher.jumpUnit;
+        catcher.jump -= catcher.jumpUnit;
+    }
+
+    if (catcher.jump <= -100 && catcher.onair){
+        catcher.onair = false;
+    }
+}
+
 
 updateCatcherPosition = () => {
     if (catcher.leftPressed && catcher.x > 0){
@@ -128,7 +150,7 @@ updatePosition = () => {
     }
 
     updateCatcherPosition();
-
+    jump();
 }
 
 startGame = () => {
