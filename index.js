@@ -58,7 +58,7 @@ background.onload = () => {
                         food.onload = () => {
                             fruit.onload = () => {
                                 tile.onload = () => {
-                                    startGame()
+                                    startPreGame();
                                 }
                                 tile.src = "images/tile.png"
                             }
@@ -78,9 +78,20 @@ background.onload = () => {
 }
 background.src = "images/background.jpg";
 
+function startPreGame(){ctx.drawImage(background, 0, 0, 500, 500);
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.font = "30px Calibri";
+    ctx.strokeText("Click here to start the game", 80, 250)
+    drawObject = (object, x, y, width, height) => {
+        ctx.drawImage(object,x,y,width,height);
+    }
 
-drawObject = (object, x, y, width, height) => {
-    ctx.drawImage(object,x,y,width,height);
+    document.getElementById("ctx").onmousedown = () => {
+        if (!gameover){
+            clearInterval(intervalvar);
+        }
+        startGame();
+    }
 }
 
 document.onkeydown = () => {
@@ -125,7 +136,7 @@ food_tile_collision = (food, tiles) => {
 }
 catcher_tile_collision = (tiles) => {
     return (
-        (food.x <= tiles.x + tileObject.width)
+        (catcher.x <= tiles.x + tileObject.width)
         && (tiles.x <= catcher.x + catcher.width)
         && (catcher.y + catcher.height <= tiles.y)
     );
@@ -166,15 +177,36 @@ updateCatcherPosition = () => {
     if (catcher.rightPressed && catcher.x < 500 - catcher.width){
         catcher.x += catcher.spd;
     }
+    if (catcher.y > 450){
+        catcher.y = 450;
+        gameover = true;
+    }
+}
+
+gameOver = () => {
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    drawObject(blood, 100, 100, 300, 300);
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.font = "30px Calibri";
+    ctx.strokeText("Game Over", 180, 200);
+    ctx.strokeText("Click to Restart", 160, 250);
+    ctx.restore();
+    clearInterval(intervalvar);
 }
 
 updatePosition = () => {
     ctx.clearRect(0,0,500,500);
     drawObject(background, 0,0,500,500);
     foodTimer++;
-    if (foodTimer > 100){
+    if (foodTimer > level){
         foodList.push({'x':foodDrop[Math.round(Math.random() * 9)],'y':0});
         foodTimer = 0;
+    }
+    if (gameover){
+        drawObject(catcherThree, catcher.x, 470, 50, 30);
+        gameOver();
     }
     if (catcher.onair){
         drawObject(catcherFour, catcher.x, catcher.y, catcher.width, catcher.height);
@@ -198,6 +230,9 @@ updatePosition = () => {
     for (var i in foodList){
         if (food_catcher_collision(foodList[i])){
             score++;
+            if (score % 2 === 0){
+                level--
+            }
             //.splice() will remove that 'food' from the screen
             foodList.splice(i,1);
         }
@@ -223,6 +258,12 @@ updatePosition = () => {
             catcher.y += catcher.gravity;
         }
     }
+
+    drawObject(food, 440, 10, 20, 20);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "20px Calibri";
+    ctx.fillText(score, 465, 27);
+    ctx.fillText("Level: " + (100 - level + 1), 10, 27);
 
     updateFoodPosition();
     updateCatcherPosition();
