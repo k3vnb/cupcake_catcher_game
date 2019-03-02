@@ -107,6 +107,30 @@ document.onkeyup = () => {
     }
 }
 
+food_catcher_collision = (food) => {
+    return (
+        (food.x < catcher.x + catcher.width)
+        && (catcher.x < food.x + foodObject.width)
+        && (food.y < catcher.y + catcher.height)
+        && (catcher.y < food.y + foodObject.height)
+    );
+}
+food_tile_collision = (food, tiles) => {
+    return (
+        (food.x < tiles.x + tileObject.width)
+        && (tiles.x < food.x + foodObject.width)
+        && (food.y < tiles.y + tileObject.height)
+        && (tiles.y < food.y + foodObject.height)
+    );
+}
+catcher_tile_collision = (tiles) => {
+    return (
+        (food.x <= tiles.x + tileObject.width)
+        && (tiles.x <= catcher.x + catcher.width)
+        && (catcher.y + catcher.height <= tiles.y)
+    );
+}
+
 jump = () => {
     //Moving Up
     if (catcher.jump > 0 && catcher.onair){
@@ -169,6 +193,35 @@ updatePosition = () => {
     }
     for (let i=0; i<tileList.length; i++){
         drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
+    }
+
+    for (var i in foodList){
+        if (food_catcher_collision(foodList[i])){
+            score++;
+            //.splice() will remove that 'food' from the screen
+            foodList.splice(i,1);
+        }
+    }
+
+    for (var i in foodList){
+        for (var j in tileList){
+            if (food_tile_collision(foodList[i], tileList[j])){
+                tileList.splice(j,1);
+            }       
+        }
+    }
+
+    if (!catcher.onair){
+        for (var i in tileList){
+            if (catcher_tile_collision(tileList[i])){
+                catcher.safe = true;
+                break;
+            }
+            catcher.safe = false;
+        }
+        if (!catcher.safe){
+            catcher.y += catcher.gravity;
+        }
     }
 
     updateFoodPosition();
