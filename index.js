@@ -48,6 +48,26 @@ const catcher = {
     'safe': true
 }
 
+function Sound(src) {
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    document.body.appendChild(this.sound);
+
+    this.play = () => {
+        this.sound.play();
+    }
+
+    this.pause = () => {
+        this.sound.pause();
+    }
+}
+
+const eatingSound = new Sound("sound/eat.mp3");
+const droppingSound = new Sound("sound/drop.mp3");
+
 //wait till assets load, then call startGame()
 background.onload = () => {
     blood.onload = () => {
@@ -178,6 +198,7 @@ updateCatcherPosition = () => {
         catcher.x += catcher.spd;
     }
     if (catcher.y > 450){
+        droppingSound.play();
         catcher.y = 450;
         gameover = true;
     }
@@ -230,6 +251,7 @@ updatePosition = () => {
     for (var i in foodList){
         if (food_catcher_collision(foodList[i])){
             score++;
+            eatingSound.play();
             if (score % 2 === 0){
                 level--
             }
