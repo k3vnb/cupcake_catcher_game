@@ -15,6 +15,7 @@ let level = 100;
 let animation = 0;
 let foodTimer = 0;
 let gameover = false;
+let paused;
 let intervalvar;
 let foodList = [];
 let tileList = [];
@@ -127,6 +128,10 @@ document.onkeydown = () => {
         catcher.jump = 100;
         catcher.onair = true;
     }
+    if (event.keyCode == 32){
+        paused ? paused = false : paused = true;
+    }
+
 }
 
 document.onkeyup = () => {
@@ -218,78 +223,87 @@ gameOver = () => {
 }
 
 updatePosition = () => {
-    ctx.clearRect(0,0,500,500);
-    drawObject(background, 0,0,500,500);
-    foodTimer++;
-    if (foodTimer > level){
-        foodList.push({'x':foodDrop[Math.round(Math.random() * 9)],'y':0});
-        foodTimer = 0;
-    }
-    if (gameover){
-        drawObject(catcherThree, catcher.x, 470, 50, 30);
-        gameOver();
-    }
-    if (catcher.onair){
-        drawObject(catcherFour, catcher.x, catcher.y, catcher.width, catcher.height);
-        animation = 1;
-    }
-    if (animation === 0){
-        drawObject(catcherTwo, catcher.x, catcher.y, catcher.width, catcher.height);
-        animation = 1;
-    } else {
-        drawObject(catcherOne, catcher.x, catcher.y, catcher.width, catcher.height);
-        animation = 0;
-    }
+    if (!paused){
+        ctx.clearRect(0,0,500,500);
+        drawObject(background, 0,0,500,500);
+        foodTimer++;
+        if (foodTimer > level){
+            foodList.push({'x':foodDrop[Math.round(Math.random() * 9)],'y':0});
+            foodTimer = 0;
+        }
+        if (gameover){
+            drawObject(catcherThree, catcher.x, 470, 50, 30);
+            gameOver();
+        }
+        if (catcher.onair){
+            drawObject(catcherFour, catcher.x, catcher.y, catcher.width, catcher.height);
+            animation = 1;
+        }
+        if (animation === 0){
+            drawObject(catcherTwo, catcher.x, catcher.y, catcher.width, catcher.height);
+            animation = 1;
+        } else {
+            drawObject(catcherOne, catcher.x, catcher.y, catcher.width, catcher.height);
+            animation = 0;
+        }
 
-    for (var i in foodList){
-        drawObject(food, foodList[i].x, foodList[i].y, foodObject.width, foodObject.height)
-    }
-    for (let i=0; i<tileList.length; i++){
-        drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
-    }
+        for (var i in foodList){
+            drawObject(food, foodList[i].x, foodList[i].y, foodObject.width, foodObject.height)
+        }
+        for (let i=0; i<tileList.length; i++){
+            drawObject(tile, tileList[i].x, tileList[i].y, tileObject.width, tileObject.height);
+        }
 
-    for (var i in foodList){
-        if (food_catcher_collision(foodList[i])){
-            score++;
-            eatingSound.play();
-            if (score % 2 === 0){
-                level--
+        for (var i in foodList){
+            if (food_catcher_collision(foodList[i])){
+                score++;
+                eatingSound.play();
+                if (score % 2 === 0){
+                    level--
+                }
+                //.splice() will remove that 'food' from the screen
+                foodList.splice(i,1);
             }
-            //.splice() will remove that 'food' from the screen
-            foodList.splice(i,1);
         }
-    }
 
-    for (var i in foodList){
-        for (var j in tileList){
-            if (food_tile_collision(foodList[i], tileList[j])){
-                tileList.splice(j,1);
-            }       
-        }
-    }
-
-    if (!catcher.onair){
-        for (var i in tileList){
-            if (catcher_tile_collision(tileList[i])){
-                catcher.safe = true;
-                break;
+        for (var i in foodList){
+            for (var j in tileList){
+                if (food_tile_collision(foodList[i], tileList[j])){
+                    tileList.splice(j,1);
+                }       
             }
-            catcher.safe = false;
         }
-        if (!catcher.safe){
-            catcher.y += catcher.gravity;
+
+        if (!catcher.onair){
+            for (var i in tileList){
+                if (catcher_tile_collision(tileList[i])){
+                    catcher.safe = true;
+                    break;
+                }
+                catcher.safe = false;
+            }
+            if (!catcher.safe){
+                catcher.y += catcher.gravity;
+            }
         }
+
+        drawObject(food, 440, 10, 20, 20);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "20px Calibri";
+        ctx.fillText(score, 465, 27);
+        ctx.fillText("Level: " + (100 - level + 1), 10, 27);
+
+        updateFoodPosition();
+        updateCatcherPosition();
+        jump();
     }
-
-    drawObject(food, 440, 10, 20, 20);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.font = "20px Calibri";
-    ctx.fillText(score, 465, 27);
-    ctx.fillText("Level: " + (100 - level + 1), 10, 27);
-
-    updateFoodPosition();
-    updateCatcherPosition();
-    jump();
+    else {
+        ctx.save();
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.font = "20px Calibri";
+        ctx.strokeText("Game Paused", 165, 250);
+        ctx.restore();
+    }
 }
 
 startGame = () => {
